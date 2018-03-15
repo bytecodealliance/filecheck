@@ -3,7 +3,7 @@ set -euo pipefail
 cd $(dirname "$0")
 topdir="$(pwd)"
 
-version="0.2.0"
+version="0.2.1"
 
 # Update all of the Cargo.toml files.
 #
