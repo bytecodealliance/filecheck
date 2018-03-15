@@ -2,7 +2,7 @@
 authors = ["The Cretonne Project Developers"]
 name = "filecheck"
 version = "0.2.0"
-description = "Library for matching test outputs against filecheck directives"
+description = "Library for writing tests for utilities that read text files and produce text output"
 license = "Apache-2.0"
 repository = "https://github.com/Cretonne/filecheck"
 documentation = "https://docs.rs/filecheck"
