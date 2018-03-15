@@ -1,37 +1,16 @@
 [package]
-name = "cretonne-tools"
 authors = ["The Cretonne Project Developers"]
-version = "0.3.4"
-description = "Binaries for testing the Cretonne library"
+name = "filecheck"
+version = "0.2.0"
+description = "Library for matching test outputs against filecheck directives"
 license = "Apache-2.0"
-documentation = "https://cretonne.readthedocs.io/"
-repository = "https://github.com/Cretonne/cretonne"
-publish = false
+repository = "https://github.com/Cretonne/filecheck"
+documentation = "https://docs.rs/filecheck"
+readme = "README.md"
+keywords = ["test"]
 
-[[bin]]
-name = "cton-util"
-path = "src/cton-util.rs"
+[lib]
+name = "filecheck"
 
 [dependencies]
-cretonne = { path = "lib/cretonne", version = "0.3.4" }
-cretonne-reader = { path = "lib/reader", version = "0.3.4" }
-cretonne-frontend = { path = "lib/frontend", version = "0.3.4" }
-cretonne-wasm = { path = "lib/wasm", version = "0.3.4" }
-cretonne-native = { path = "lib/native", version = "0.3.4" }
-cretonne-test = { path = "lib/test", version = "0.3.4" }
-filecheck = { path = "lib/filecheck" }
-docopt = "0.8.0"
-serde = "1.0.8"
-serde_derive = "1.0.8"
-tempdir = "0.3.5"
-term = "0.5"
-
-[workspace]
-
-# Enable debug assertions and parallel compilation when building cretonne-tools
-# since they are for testing and development mostly. This doesn't affect the
-# flags used to build the Cretonne crate when used as a dependency.
-[profile.release]
-opt-level = 2
-debug-assertions = true
-codegen-units = 4
+regex = "0.2.6"
