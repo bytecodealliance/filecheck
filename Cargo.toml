@@ -14,3 +14,7 @@ name = "filecheck"
 
 [dependencies]
 regex = "0.2.6"
+
+[badges]
+maintenance = { status = "passively-maintained" }
+travis-ci = { repository = "Cretonne/filecheck" }
