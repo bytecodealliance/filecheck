@@ -205,6 +205,21 @@ fn leading_sameln() {
 }
 
 #[test]
+fn syntax_error() {
+    let mut b = CheckerBuilder::new();
+    let c = b.text(
+        "
+        check: $(
+        ",
+    );
+
+    assert_eq!(
+        c.map(|_c| ()).map_err(e2s),
+        Err("unterminated $(...".into())
+    );
+}
+
+#[test]
 fn not() {
     let c = CheckerBuilder::new()
         .text(
