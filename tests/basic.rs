@@ -1,6 +1,6 @@
 extern crate filecheck;
 
-use filecheck::{CheckerBuilder, NO_VARIABLES, Error as FcError};
+use filecheck::{CheckerBuilder, Error as FcError, NO_VARIABLES};
 
 fn e2s(e: FcError) -> String {
     e.to_string()
@@ -304,15 +304,13 @@ fn unordered() {
     );
 
     assert_eq!(
-        c.check("one two four three four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one two four three four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
     assert_eq!(
-        c.check("one three four two four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one three four two four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
 
@@ -349,15 +347,13 @@ fn leading_unordered() {
     );
 
     assert_eq!(
-        c.check("one two four three four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one two four three four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
     assert_eq!(
-        c.check("one three four two four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one three four two four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
 
@@ -394,15 +390,13 @@ fn trailing_unordered() {
     );
 
     assert_eq!(
-        c.check("one two four three four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one two four three four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
     assert_eq!(
-        c.check("one three four two four", NO_VARIABLES).map_err(
-            e2s,
-        ),
+        c.check("one three four two four", NO_VARIABLES,)
+            .map_err(e2s,),
         Ok(true)
     );
 

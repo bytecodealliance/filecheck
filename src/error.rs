@@ -1,6 +1,6 @@
-use std::result;
-use std::convert::From;
 use regex;
+use std::convert::From;
+use std::result;
 
 /// A result from the filecheck library.
 pub type Result<T> = result::Result<T, Error>;
@@ -35,10 +35,7 @@ pub enum Error {
     ///
     /// Use `cause()` to get the underlying `Regex` library error.
     #[fail(display = "{}", _0)]
-    Regex(
-        #[cause]
-        regex::Error
-    ),
+    Regex(#[cause] regex::Error),
 }
 
 impl From<regex::Error> for Error {

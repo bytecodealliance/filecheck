@@ -1,10 +1,10 @@
 //! Pattern matching for a single directive.
 
 use error::{Error, Result};
-use variable::{varname_prefix, VariableMap, Value};
-use std::str::FromStr;
+use regex::{escape, Regex, RegexBuilder};
 use std::fmt::{self, Display, Formatter, Write};
-use regex::{Regex, RegexBuilder, escape};
+use std::str::FromStr;
+use variable::{varname_prefix, Value, VariableMap};
 
 /// A pattern to match as specified in a directive.
 ///
@@ -45,8 +45,7 @@ impl Part {
     /// Get the variable referenced by this part, if any.
     pub fn ref_var(&self) -> Option<&str> {
         match *self {
-            Part::Var(ref var) |
-            Part::DefVar { ref var, .. } => Some(var),
+            Part::Var(ref var) | Part::DefVar { ref var, .. } => Some(var),
             _ => None,
         }
     }
@@ -70,9 +69,10 @@ impl Pattern {
     /// Return the allocated def number.
     fn add_def(&mut self, v: &str) -> Result<usize> {
         if self.defines_var(v) {
-            Err(Error::DuplicateDef(
-                format!("duplicate definition of ${} in same pattern", v),
-            ))
+            Err(Error::DuplicateDef(format!(
+                "duplicate definition of ${} in same pattern",
+                v
+            )))
         } else {
             let idx = self.defs.len();
             self.defs.push(v.to_string());
@@ -114,8 +114,7 @@ impl Pattern {
         // All remaining possibilities start with `$(`.
         if s.len() < 2 || !s.starts_with("$(") {
             return Err(Error::Syntax(
-                "pattern syntax error, use $$ to match a single $"
-                    .to_string(),
+                "pattern syntax error, use $$ to match a single $".to_string(),
             ));
         }
 
@@ -141,9 +140,10 @@ impl Pattern {
                 // Variable definition. Fall through.
             }
             Some(ch) => {
-                return Err(Error::Syntax(
-                    format!("syntax error in $({}... '{}'", varname, ch),
-                ));
+                return Err(Error::Syntax(format!(
+                    "syntax error in $({}... '{}'",
+                    varname, ch
+                )));
             }
         }
 
@@ -161,9 +161,10 @@ impl Pattern {
             let refname_begin = varname_end + 2;
             let refname_end = refname_begin + varname_prefix(&s[refname_begin..]);
             if refname_begin == refname_end {
-                return Err(Error::Syntax(
-                    format!("expected variable name in $({}=$...", varname),
-                ));
+                return Err(Error::Syntax(format!(
+                    "expected variable name in $({}=$...",
+                    varname
+                )));
             }
             if !s[refname_end..].starts_with(')') {
                 return Err(Error::Syntax(format!(
@@ -182,9 +183,10 @@ impl Pattern {
                     refname_end + 1,
                 ))
             } else {
-                Err(Error::Syntax(
-                    format!("expected variable name in $(=${})", refname),
-                ))
+                Err(Error::Syntax(format!(
+                    "expected variable name in $(=${})",
+                    refname
+                )))
             };
         }
 
@@ -224,11 +226,11 @@ fn regex_prefix(s: &str) -> usize {
     let mut escape = false;
     // State around parsing charsets.
     enum State {
-        Normal, // Outside any charset.
-        Curly, // Inside curly braces.
+        Normal,  // Outside any charset.
+        Curly,   // Inside curly braces.
         CSFirst, // Immediately after opening `[`.
-        CSNeg, // Immediately after `[^`.
-        CSBody, // Inside `[...`.
+        CSNeg,   // Immediately after `[^`.
+        CSBody,  // Inside `[...`.
     }
     let mut state = State::Normal;
 
@@ -244,16 +246,14 @@ fn regex_prefix(s: &str) -> usize {
             continue;
         }
         match state {
-            State::Normal => {
-                match ch {
-                    '[' => state = State::CSFirst,
-                    '{' => state = State::Curly,
-                    '(' => nest += 1,
-                    ')' if nest > 0 => nest -= 1,
-                    ')' | '}' => return idx,
-                    _ => {}
-                }
-            }
+            State::Normal => match ch {
+                '[' => state = State::CSFirst,
+                '{' => state = State::Curly,
+                '(' => nest += 1,
+                ')' if nest > 0 => nest -= 1,
+                ')' | '}' => return idx,
+                _ => {}
+            },
             State::Curly => {
                 if ch == '}' {
                     state = State::Normal;
@@ -291,7 +291,7 @@ impl FromStr for Pattern {
                 if pat.defines_var(v) {
                     return Err(Error::Backref(format!(
                         "unsupported back-reference to '${}' \
-                                                       defined in same pattern",
+                         defined in same pattern",
                         v
                     )));
                 }
@@ -358,7 +358,6 @@ impl Pattern {
                     }
                 }
             }
-
         }
 
         // Add a word boundary check `\b` to the end of the regex, but only if the final part
@@ -422,7 +421,7 @@ mod tests {
 
     #[test]
     fn part() {
-        use super::{Pattern, Part};
+        use super::{Part, Pattern};
         let mut pat = Pattern::new();
 
         // This is dubious, should we panic instead?
@@ -432,54 +431,54 @@ mod tests {
             pat.parse_part("x").unwrap(),
             (Part::Text("x".to_string()), 1)
         );
-        assert_eq!(pat.parse_part("x2").unwrap(), (
-            Part::Text("x2".to_string()),
-            2,
-        ));
-        assert_eq!(pat.parse_part("x$").unwrap(), (
-            Part::Text("x".to_string()),
-            1,
-        ));
-        assert_eq!(pat.parse_part("x$$").unwrap(), (
-            Part::Text("x".to_string()),
-            1,
-        ));
+        assert_eq!(
+            pat.parse_part("x2").unwrap(),
+            (Part::Text("x2".to_string()), 2,)
+        );
+        assert_eq!(
+            pat.parse_part("x$").unwrap(),
+            (Part::Text("x".to_string()), 1,)
+        );
+        assert_eq!(
+            pat.parse_part("x$$").unwrap(),
+            (Part::Text("x".to_string()), 1,)
+        );
 
         assert_eq!(
             pat.parse_part("$").unwrap_err().to_string(),
             "pattern syntax error, use $$ to match a single $"
         );
 
-        assert_eq!(pat.parse_part("$$").unwrap(), (
-            Part::Text("$".to_string()),
-            2,
-        ));
-        assert_eq!(pat.parse_part("$$ ").unwrap(), (
-            Part::Text("$".to_string()),
-            2,
-        ));
+        assert_eq!(
+            pat.parse_part("$$").unwrap(),
+            (Part::Text("$".to_string()), 2,)
+        );
+        assert_eq!(
+            pat.parse_part("$$ ").unwrap(),
+            (Part::Text("$".to_string()), 2,)
+        );
 
         assert_eq!(
             pat.parse_part("$0").unwrap(),
             (Part::Var("0".to_string()), 2)
         );
-        assert_eq!(pat.parse_part("$xx=").unwrap(), (
-            Part::Var("xx".to_string()),
-            3,
-        ));
-        assert_eq!(pat.parse_part("$xx$").unwrap(), (
-            Part::Var("xx".to_string()),
-            3,
-        ));
+        assert_eq!(
+            pat.parse_part("$xx=").unwrap(),
+            (Part::Var("xx".to_string()), 3,)
+        );
+        assert_eq!(
+            pat.parse_part("$xx$").unwrap(),
+            (Part::Var("xx".to_string()), 3,)
+        );
 
-        assert_eq!(pat.parse_part("$(0)").unwrap(), (
-            Part::Var("0".to_string()),
-            4,
-        ));
-        assert_eq!(pat.parse_part("$()").unwrap(), (
-            Part::Text("".to_string()),
-            3,
-        ));
+        assert_eq!(
+            pat.parse_part("$(0)").unwrap(),
+            (Part::Var("0".to_string()), 4,)
+        );
+        assert_eq!(
+            pat.parse_part("$()").unwrap(),
+            (Part::Text("".to_string()), 3,)
+        );
 
         assert_eq!(
             pat.parse_part("$(0").unwrap_err().to_string(),
@@ -513,68 +512,79 @@ mod tests {
 
     #[test]
     fn partdefs() {
-        use super::{Pattern, Part};
+        use super::{Part, Pattern};
         let mut pat = Pattern::new();
 
-        assert_eq!(pat.parse_part("$(foo=$bar)").unwrap(), (
-            Part::DefVar {
-                def: 0,
-                var: "bar".to_string(),
-            },
-            11,
-        ));
+        assert_eq!(
+            pat.parse_part("$(foo=$bar)").unwrap(),
+            (
+                Part::DefVar {
+                    def: 0,
+                    var: "bar".to_string(),
+                },
+                11,
+            )
+        );
         assert_eq!(
             pat.parse_part("$(foo=$bar)").unwrap_err().to_string(),
             "duplicate definition of $foo in same pattern"
         );
 
-        assert_eq!(pat.parse_part("$(fxo=$bar)x").unwrap(), (
-            Part::DefVar {
-                def: 1,
-                var: "bar".to_string(),
-            },
-            11,
-        ));
+        assert_eq!(
+            pat.parse_part("$(fxo=$bar)x").unwrap(),
+            (
+                Part::DefVar {
+                    def: 1,
+                    var: "bar".to_string(),
+                },
+                11,
+            )
+        );
 
-        assert_eq!(pat.parse_part("$(fo2=[a-z])").unwrap(), (
-            Part::DefLit {
-                def: 2,
-                regex: "(?P<fo2>[a-z])".to_string(),
-            },
-            12,
-        ));
-        assert_eq!(pat.parse_part("$(fo3=[a-)])").unwrap(), (
-            Part::DefLit {
-                def: 3,
-                regex: "(?P<fo3>[a-)])".to_string(),
-            },
-            12,
-        ));
-        assert_eq!(pat.parse_part("$(fo4=)").unwrap(), (
-            Part::DefLit {
-                def: 4,
-                regex: "(?P<fo4>)".to_string(),
-            },
-            7,
-        ));
+        assert_eq!(
+            pat.parse_part("$(fo2=[a-z])").unwrap(),
+            (
+                Part::DefLit {
+                    def: 2,
+                    regex: "(?P<fo2>[a-z])".to_string(),
+                },
+                12,
+            )
+        );
+        assert_eq!(
+            pat.parse_part("$(fo3=[a-)])").unwrap(),
+            (
+                Part::DefLit {
+                    def: 3,
+                    regex: "(?P<fo3>[a-)])".to_string(),
+                },
+                12,
+            )
+        );
+        assert_eq!(
+            pat.parse_part("$(fo4=)").unwrap(),
+            (
+                Part::DefLit {
+                    def: 4,
+                    regex: "(?P<fo4>)".to_string(),
+                },
+                7,
+            )
+        );
 
-        assert_eq!(pat.parse_part("$(=.*)").unwrap(), (
-            Part::Regex(
-                "(?:.*)".to_string(),
-            ),
-            6,
-        ));
+        assert_eq!(
+            pat.parse_part("$(=.*)").unwrap(),
+            (Part::Regex("(?:.*)".to_string(),), 6,)
+        );
 
-        assert_eq!(pat.parse_part("$(=)").unwrap(), (
-            Part::Regex(
-                "(?:)".to_string(),
-            ),
-            4,
-        ));
-        assert_eq!(pat.parse_part("$()").unwrap(), (
-            Part::Text("".to_string()),
-            3,
-        ));
+        assert_eq!(
+            pat.parse_part("$(=)").unwrap(),
+            (Part::Regex("(?:)".to_string(),), 4,)
+        );
+        assert_eq!(
+            pat.parse_part("$()").unwrap(),
+            (Part::Text("".to_string()), 3,)
+        );
     }
 
     #[test]

@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-cd $(dirname "$0")
-topdir="$(pwd)"
+
+topdir=$(dirname "$0")
+cd "$topdir"
 
 version="0.3.0"
 
@@ -22,5 +23,3 @@ cargo update
 echo git commit -a -m "\"Bump version to $version"\"
 echo git push
 echo cargo publish --manifest-path Cargo.toml
-echo
-echo Then, go to https://github.com/Cretonne/filecheck/releases/ and define a new release.

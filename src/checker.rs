@@ -1,14 +1,14 @@
 use error::{Error, Result};
-use variable::{VariableMap, Value, varname_prefix};
+use explain::{Explainer, Recorder};
 use pattern::Pattern;
-use regex::{Regex, Captures};
+use regex::{Captures, Regex};
 use std::borrow::Cow;
-use std::collections::HashMap;
 use std::cmp::max;
+use std::collections::HashMap;
 use std::fmt::{self, Display, Formatter};
 use std::mem;
+use variable::{varname_prefix, Value, VariableMap};
 use MatchRange;
-use explain::{Recorder, Explainer};
 
 // The different kinds of directives we support.
 enum Directive {
@@ -66,16 +66,16 @@ impl Directive {
     fn regex(rest: &str) -> Result<Directive> {
         let varlen = varname_prefix(rest);
         if varlen == 0 {
-            return Err(Error::Syntax(
-                format!("invalid variable name in regex: {}", rest),
-            ));
+            return Err(Error::Syntax(format!(
+                "invalid variable name in regex: {}",
+                rest
+            )));
         }
         let var = rest[0..varlen].to_string();
         if !rest[varlen..].starts_with('=') {
             return Err(Error::Syntax(format!(
                 "expected '=' after variable '{}' in regex: {}",
-                var,
-                rest
+                var, rest
             )));
         }
         // Ignore trailing white space in the regex, including CR.
@@ -85,7 +85,6 @@ impl Directive {
         ))
     }
 }
-
 
 /// Builder for constructing a `Checker` instance.
 pub struct CheckerBuilder {
@@ -147,7 +146,9 @@ pub struct Checker {
 
 impl Checker {
     fn new(directives: Vec<Directive>) -> Self {
-        Self { directives: directives }
+        Self {
+            directives: directives,
+        }
     }
 
     /// An empty checker contains no directives, and will match any input string.
@@ -221,16 +222,15 @@ impl Checker {
                         state.recorder.directive(not_idx);
                         if let Some(mat) = rx.find(&text[not_begin..match_begin]) {
                             // Matched `not:` pattern.
-                            state.recorder.matched_not(rx.as_str(), (
-                                not_begin + mat.start(),
-                                not_begin + mat.end(),
-                            ));
+                            state.recorder.matched_not(
+                                rx.as_str(),
+                                (not_begin + mat.start(), not_begin + mat.end()),
+                            );
                             return Ok(false);
                         } else {
-                            state.recorder.missed_not(
-                                rx.as_str(),
-                                (not_begin, match_begin),
-                            );
+                            state
+                                .recorder
+                                .missed_not(rx.as_str(), (not_begin, match_begin));
                         }
                     }
                 }
@@ -431,9 +431,7 @@ mod tests {
         );
         assert_eq!(
             b.directive("regex: X = tommy").map_err(e2s),
-            Err(
-                "expected '=' after variable 'X' in regex: X = tommy".to_string(),
-            )
+            Err("expected '=' after variable 'X' in regex: X = tommy".to_string(),)
         );
         assert_eq!(
             b.directive("[arm]not:    patt $x $(y) here").map_err(e2s),
@@ -450,7 +448,7 @@ mod tests {
         assert_eq!(
             c.to_string(),
             "#0 regex: X=more text\n#1 not: patt $(x) $(y) here\n#2 sameln: $(x) \
-                    $(y=[^]]*) there\n#3 regex: Y=foo\n"
+             $(y=[^]]*) there\n#3 regex: Y=foo\n"
         );
     }
 }

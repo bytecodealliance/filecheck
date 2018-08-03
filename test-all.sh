@@ -3,41 +3,60 @@ set -euo pipefail
 
 # This is the top-level test script:
 #
+# - Check code formatting.
 # - Make a debug build.
 # - Make a release build.
 # - Run unit tests for all Rust crates
 # - Build API documentation.
+# - Optionally, run clippy.
 #
 # All tests run by this script should be passing at all times.
 
 # Repository top-level directory.
-cd $(dirname "$0")
-topdir=$(pwd)
+topdir=$(dirname "$0")
+cd "$topdir"
 
-function banner() {
-    echo "======  $@  ======"
+function banner {
+    echo "======  $*  ======"
 }
 
 # Run rustfmt if we have it.
-if $topdir/check-rustfmt.sh; then
-    banner "Rust formatting"
-    $topdir/format-all.sh --write-mode=diff
+banner "Rust formatting"
+if type rustfmt > /dev/null; then
+    if ! "$topdir/format-all.sh" --check ; then
+        echo "Formatting diffs detected! Run \"cargo fmt --all\" to correct."
+        exit 1
+    fi
+else
+    echo "rustfmt not available; formatting not checked!"
+    echo
+    echo "If you are using rustup, rustfmt can be installed via"
+    echo "\"rustup component add --toolchain=stable rustfmt-preview\", or see"
+    echo "https://github.com/rust-lang-nursery/rustfmt for more information."
 fi
 
-cd "$topdir"
+# Make sure the code builds in release mode.
+banner "Rust release build"
+cargo build --release
 
 # Make sure the code builds in debug mode.
 banner "Rust debug build"
 cargo build
 
-# Make sure the code builds in release mode, and run the unit tests. We run
-# these in release mode for speed, but note that the top-level Cargo.toml file
-# does enable debug assertions in release builds.
-banner "Rust release build and unit tests"
-cargo test --all --release
+# Run the tests. We run these in debug mode so that assertions are enabled.
+banner "Rust unit tests"
+cargo test --all
 
 # Make sure the documentation builds.
 banner "Rust documentation: $topdir/target/doc/filecheck/index.html"
 cargo doc
+
+# Run clippy if we have it.
+banner "Rust linter"
+if "$topdir/check-clippy.sh"; then
+    "$topdir/clippy-all.sh"
+else
+    echo "\`cargo +nightly install clippy\` for optional rust linting"
+fi
 
 banner "OK"

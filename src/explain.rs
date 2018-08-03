@@ -1,8 +1,8 @@
 //! Explaining how *filecheck* matched or failed to match a file.
 
-use MatchRange;
-use std::fmt::{self, Display, Formatter};
 use std::cmp::min;
+use std::fmt::{self, Display, Formatter};
+use MatchRange;
 
 /// Record events during matching.
 pub trait Recorder {
@@ -121,10 +121,9 @@ impl<'a> Display for Explainer<'a> {
             )?;
 
             // Emit any variable definitions.
-            if let Ok(found) = self.vardefs.binary_search_by_key(
-                &m.directive,
-                |v| v.directive,
-            )
+            if let Ok(found) = self
+                .vardefs
+                .binary_search_by_key(&m.directive, |v| v.directive)
             {
                 let mut first = found;
                 while first > 0 && self.vardefs[first - 1].directive == m.directive {

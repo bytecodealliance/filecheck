@@ -236,24 +236,22 @@
 //! This will match `"one, two"` , but not `"one,two"`. Without the `$()`, trailing whitespace
 //! would be trimmed from the pattern.
 
-#![deny(missing_docs,
-        trivial_numeric_casts,
-        unused_extern_crates)]
+#![deny(missing_docs, trivial_numeric_casts, unused_extern_crates)]
 
-pub use error::{Error, Result};
-pub use variable::{VariableMap, Value, NO_VARIABLES};
 pub use checker::{Checker, CheckerBuilder};
+pub use error::{Error, Result};
+pub use variable::{Value, VariableMap, NO_VARIABLES};
 
-extern crate regex;
 extern crate failure;
+extern crate regex;
 #[macro_use]
 extern crate failure_derive;
 
-mod error;
-mod variable;
-mod pattern;
 mod checker;
+mod error;
 mod explain;
+mod pattern;
+mod variable;
 
 /// The range of a match in the input text.
 pub type MatchRange = (usize, usize);
