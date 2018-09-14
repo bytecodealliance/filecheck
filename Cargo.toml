@@ -1,10 +1,10 @@
 [package]
-authors = ["The Cretonne Project Developers"]
+authors = ["The Cranelift Project Developers"]
 name = "filecheck"
 version = "0.3.0"
 description = "Library for writing tests for utilities that read text files and produce text output"
 license = "Apache-2.0"
-repository = "https://github.com/Cretonne/filecheck"
+repository = "https://github.com/Cranelift/filecheck"
 documentation = "https://docs.rs/filecheck"
 readme = "README.md"
 keywords = ["test"]
@@ -19,4 +19,4 @@ failure_derive = "0.1.1"
 
 [badges]
 maintenance = { status = "passively-maintained" }
-travis-ci = { repository = "Cretonne/filecheck" }
+travis-ci = { repository = "Cranelift/filecheck" }

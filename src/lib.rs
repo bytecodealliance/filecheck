@@ -51,7 +51,7 @@
 //!
 //! ```sh
 //! $ rustc primes.rs
-//! $ ./primes | cton-util filecheck -v
+//! $ ./primes | clif-util filecheck -v
 //! #0 regex: NUM=\d+
 //! #1 not: $NUM
 //! #2 check: 2
