@@ -4,7 +4,7 @@ set -euo pipefail
 topdir=$(dirname "$0")
 cd "$topdir"
 
-version="0.3.0"
+version="0.4.0"
 
 # Update all of the Cargo.toml files.
 #
