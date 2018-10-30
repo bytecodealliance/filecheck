@@ -8,7 +8,6 @@ set -euo pipefail
 # - Make a release build.
 # - Run unit tests for all Rust crates
 # - Build API documentation.
-# - Optionally, run clippy.
 #
 # All tests run by this script should be passing at all times.
 
@@ -50,13 +49,5 @@ cargo test --all
 # Make sure the documentation builds.
 banner "Rust documentation: $topdir/target/doc/filecheck/index.html"
 cargo doc
-
-# Run clippy if we have it.
-banner "Rust linter"
-if "$topdir/check-clippy.sh"; then
-    "$topdir/clippy-all.sh"
-else
-    echo "\`cargo +nightly install clippy\` for optional rust linting"
-fi
 
 banner "OK"
