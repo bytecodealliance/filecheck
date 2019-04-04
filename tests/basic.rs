@@ -47,7 +47,8 @@ fn simple() {
         check: one
         check: two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "
@@ -77,7 +78,8 @@ fn sameln() {
         check: one
         sameln: two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "
@@ -113,7 +115,8 @@ fn nextln() {
         check: one
         nextln: two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "
@@ -157,7 +160,8 @@ fn leading_nextln() {
         nextln: one
         nextln: two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "zero
@@ -183,7 +187,8 @@ fn leading_sameln() {
         sameln: one
         sameln: two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "zero
@@ -223,7 +228,8 @@ fn not() {
         not: $()eat$()
         check: $()two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "onetwo";
@@ -249,7 +255,8 @@ fn notnot() {
         not: half
         check: $()two
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     let t = "onetwo";
@@ -283,7 +290,8 @@ fn unordered() {
         unordered: three
         check: four
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     assert_eq!(
@@ -325,7 +333,8 @@ fn leading_unordered() {
         unordered: three
         check: four
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     assert_eq!(
@@ -367,7 +376,8 @@ fn trailing_unordered() {
         unordered: two
         unordered: three
         ",
-        ).unwrap()
+        )
+        .unwrap()
         .finish();
 
     assert_eq!(

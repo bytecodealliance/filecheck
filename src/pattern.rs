@@ -338,7 +338,7 @@ impl Pattern {
                     // Resolve the variable. We can handle a plain text expansion.
                     match vmap.lookup(var) {
                         None => {
-                            return Err(Error::UndefVariable(format!("undefined variable ${}", var)))
+                            return Err(Error::UndefVariable(format!("undefined variable ${}", var)));
                         }
                         Some(Value::Text(s)) => out.push_str(&escape(&s)),
                         // Wrap regex in non-capturing group for safe concatenation.
@@ -351,7 +351,7 @@ impl Pattern {
                     write!(out, "(?P<{}>", self.defs[def]).unwrap();
                     match vmap.lookup(var) {
                         None => {
-                            return Err(Error::UndefVariable(format!("undefined variable ${}", var)))
+                            return Err(Error::UndefVariable(format!("undefined variable ${}", var)));
                         }
                         Some(Value::Text(s)) => write!(out, "{})", escape(&s[..])).unwrap(),
                         Some(Value::Regex(rx)) => write!(out, "{})", rx).unwrap(),
