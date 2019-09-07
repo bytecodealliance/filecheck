@@ -3,8 +3,6 @@
 language: rust
 rust:
     - stable
-    # The version of rust in the latest Ubuntu LTS, currently Bionic.
-    - 1.25.0
     - beta
     - nightly
 matrix:
