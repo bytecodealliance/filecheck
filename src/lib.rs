@@ -242,8 +242,6 @@ pub use checker::{Checker, CheckerBuilder};
 pub use error::{Error, Result};
 pub use variable::{Value, VariableMap, NO_VARIABLES};
 
-extern crate failure;
-extern crate regex;
 #[macro_use]
 extern crate failure_derive;
 

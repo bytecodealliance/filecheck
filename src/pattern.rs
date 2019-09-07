@@ -1,10 +1,10 @@
 //! Pattern matching for a single directive.
 
-use error::{Error, Result};
+use crate::error::{Error, Result};
+use crate::variable::{varname_prefix, Value, VariableMap};
 use regex::{escape, Regex, RegexBuilder};
 use std::fmt::{self, Display, Formatter, Write};
 use std::str::FromStr;
-use variable::{varname_prefix, Value, VariableMap};
 
 /// A pattern to match as specified in a directive.
 ///
@@ -315,7 +315,7 @@ impl Pattern {
     }
 
     /// Resolve all variable references in this pattern, turning it into a regular expression.
-    pub fn resolve(&self, vmap: &VariableMap) -> Result<Regex> {
+    pub fn resolve(&self, vmap: &dyn VariableMap) -> Result<Regex> {
         let mut out = String::new();
 
         // Add a word boundary check `\b` to the beginning of the regex, but only if the first part

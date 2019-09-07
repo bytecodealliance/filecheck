@@ -1,14 +1,14 @@
-use error::{Error, Result};
-use explain::{Explainer, Recorder};
-use pattern::Pattern;
+use crate::error::{Error, Result};
+use crate::explain::{Explainer, Recorder};
+use crate::pattern::Pattern;
+use crate::variable::{varname_prefix, Value, VariableMap};
+use crate::MatchRange;
 use regex::{Captures, Regex};
 use std::borrow::Cow;
 use std::cmp::max;
 use std::collections::HashMap;
 use std::fmt::{self, Display, Formatter};
 use std::mem;
-use variable::{varname_prefix, Value, VariableMap};
-use MatchRange;
 
 // The different kinds of directives we support.
 enum Directive {
@@ -81,7 +81,7 @@ impl Directive {
         // Ignore trailing white space in the regex, including CR.
         Ok(Directive::Regex(
             var,
-            rest[varlen + 1..].trim_right().to_string(),
+            rest[varlen + 1..].trim_end().to_string(),
         ))
     }
 }
@@ -146,9 +146,7 @@ pub struct Checker {
 
 impl Checker {
     fn new(directives: Vec<Directive>) -> Self {
-        Self {
-            directives: directives,
-        }
+        Self { directives }
     }
 
     /// An empty checker contains no directives, and will match any input string.
@@ -160,19 +158,19 @@ impl Checker {
     ///
     /// This returns `true` if the text matches all the directives, `false` if it doesn't.
     /// An error is only returned if there is a problem with the directives.
-    pub fn check(&self, text: &str, vars: &VariableMap) -> Result<bool> {
+    pub fn check(&self, text: &str, vars: &dyn VariableMap) -> Result<bool> {
         self.run(text, vars, &mut ())
     }
 
     /// Explain how directives are matched against the input text.
-    pub fn explain(&self, text: &str, vars: &VariableMap) -> Result<(bool, String)> {
+    pub fn explain(&self, text: &str, vars: &dyn VariableMap) -> Result<(bool, String)> {
         let mut expl = Explainer::new(text);
         let success = self.run(text, vars, &mut expl)?;
         expl.finish();
         Ok((success, expl.to_string()))
     }
 
-    fn run(&self, text: &str, vars: &VariableMap, recorder: &mut Recorder) -> Result<bool> {
+    fn run(&self, text: &str, vars: &dyn VariableMap, recorder: &mut dyn Recorder) -> Result<bool> {
         let mut state = State::new(text, vars, recorder);
 
         // For each pending `not:` check, store (begin-offset, regex).
@@ -264,8 +262,8 @@ pub struct VarDef<'a> {
 
 struct State<'a> {
     text: &'a str,
-    env_vars: &'a VariableMap,
-    recorder: &'a mut Recorder,
+    env_vars: &'a dyn VariableMap,
+    recorder: &'a mut dyn Recorder,
 
     vars: HashMap<String, VarDef<'a>>,
     // Offset after the last ordered match. This does not include recent unordered matches.
@@ -275,7 +273,11 @@ struct State<'a> {
 }
 
 impl<'a> State<'a> {
-    fn new(text: &'a str, env_vars: &'a VariableMap, recorder: &'a mut Recorder) -> State<'a> {
+    fn new(
+        text: &'a str,
+        env_vars: &'a dyn VariableMap,
+        recorder: &'a mut dyn Recorder,
+    ) -> State<'a> {
         State {
             text,
             env_vars,
@@ -414,7 +416,7 @@ impl Display for Checker {
 #[cfg(test)]
 mod tests {
     use super::CheckerBuilder;
-    use error::Error;
+    use crate::error::Error;
 
     fn e2s(e: Error) -> String {
         e.to_string()

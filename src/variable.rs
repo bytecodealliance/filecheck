@@ -9,7 +9,7 @@ use std::borrow::Cow;
 pub fn varname_prefix(s: &str) -> usize {
     for (idx, ch) in s.char_indices() {
         match ch {
-            'a'...'z' | 'A'...'Z' | '0'...'9' | '_' => {}
+            'a'..='z' | 'A'..='Z' | '0'..='9' | '_' => {}
             _ => return idx,
         }
     }
@@ -38,7 +38,7 @@ impl VariableMap for () {
 }
 
 /// An empty variable map.
-pub const NO_VARIABLES: &'static VariableMap = &();
+pub const NO_VARIABLES: &'static dyn VariableMap = &();
 
 #[cfg(test)]
 mod tests {

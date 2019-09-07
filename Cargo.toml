@@ -8,6 +8,7 @@ repository = "https://github.com/CraneStation/filecheck"
 documentation = "https://docs.rs/filecheck"
 readme = "README.md"
 keywords = ["test"]
+edition = "2018"
 
 [lib]
 name = "filecheck"
