@@ -1,21 +1,20 @@
-use regex;
-use std::convert::From;
 use std::result;
+use thiserror::Error;
 
 /// A result from the filecheck library.
 pub type Result<T> = result::Result<T, Error>;
 
 /// A filecheck error.
-#[derive(Fail, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     /// A syntax error in a check line.
-    #[fail(display = "{}", _0)]
+    #[error("{0}")]
     Syntax(String),
     /// A check refers to an undefined variable.
     ///
     /// The pattern contains `$foo` where the `foo` variable has not yet been defined.
     /// Use `$$` to match a literal dollar sign.
-    #[fail(display = "{}", _0)]
+    #[error("{0}")]
     UndefVariable(String),
     /// A pattern contains a back-reference to a variable that was defined in the same pattern.
     ///
@@ -26,20 +25,14 @@ pub enum Error {
     /// check: Hello $(world=[^ ]*)
     /// sameln: $world
     /// ```
-    #[fail(display = "{}", _0)]
+    #[error("{0}")]
     Backref(String),
     /// A pattern contains multiple definitions of the same variable.
-    #[fail(display = "{}", _0)]
+    #[error("{0}")]
     DuplicateDef(String),
     /// An error in a regular expression.
     ///
     /// Use `cause()` to get the underlying `Regex` library error.
-    #[fail(display = "{}", _0)]
-    Regex(#[cause] regex::Error),
-}
-
-impl From<regex::Error> for Error {
-    fn from(e: regex::Error) -> Error {
-        Error::Regex(e)
-    }
+    #[error("{0}")]
+    Regex(#[from] regex::Error),
 }
